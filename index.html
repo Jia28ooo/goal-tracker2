@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="目標管理">
+<meta name="theme-color" content="#B05553">
+<title>目標管理</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500&family=Noto+Sans+TC:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root{
+  --rose:#B05553;--navy:#3B567F;--sky:#A4C2CA;--blush:#CAA4A3;
+  --rose-pale:#F2E4E4;--navy-pale:#E8ECF3;--sky-pale:#EBF3F5;--blush-pale:#F5EDEC;
+  --blush-light:#E8D5D4;
+  --green:#6A9E72;--green-pale:#EAF3EB;
+  --amber:#C4913A;--amber-pale:#FBF0E0;
+  --purple:#7B68A4;--purple-pale:#F0EEF8;
+  --bg:#FAF7F5;--surface:#FFF;
+  --charcoal:#2C2C2C;--soft-gray:#6E6B68;--muted:#A8A4A0;--border:#E8E2DE;
+  --tab-h:58px;--header-h:52px;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--charcoal);font-family:'Noto Sans TC',sans-serif;font-weight:300;}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh;position:fixed;inset:0;}
+
+/* HEADER */
+.header{height:calc(var(--header-h) + var(--safe-top));padding-top:var(--safe-top);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:flex-end;padding-bottom:10px;padding-left:18px;padding-right:18px;justify-content:space-between;flex-shrink:0;z-index:20;}
+.logo{display:flex;align-items:center;gap:8px;}
+.logo-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--rose),var(--navy));display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-family:'Noto Serif TC',serif;}
+.logo-title{font-family:'Noto Serif TC',serif;font-size:15px;font-weight:500;letter-spacing:.05em;}
+.header-right{font-size:11px;color:var(--muted);}
+
+/* SCROLL */
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+
+/* TABS */
+.tabs{height:calc(var(--tab-h) + var(--safe-bot));padding-bottom:var(--safe-bot);background:var(--surface);border-top:1px solid var(--border);display:flex;flex-shrink:0;z-index:20;}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--muted);border:none;background:transparent;font-family:'Noto Sans TC',sans-serif;position:relative;transition:color .15s;}
+.tab.active{color:var(--rose);}
+.ti{font-size:18px;line-height:1;}
+.tl{font-size:9px;letter-spacing:.01em;}
+.tbadge{position:absolute;top:6px;right:calc(50% - 16px);background:var(--rose);color:#fff;font-size:8px;border-radius:100px;padding:1px 5px;min-width:14px;text-align:center;}
+
+/* PAGES */
+.page{display:none;padding:16px 16px 88px;min-height:100%;}
+.page.active{display:block;}
+.pg-label{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.pg-title{font-family:'DM Serif Display',serif;font-size:23px;font-weight:400;margin-bottom:3px;}
+.pg-sub{font-size:12px;color:var(--soft-gray);margin-bottom:16px;}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:11px;}
+.card-label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+
+/* STAT GRIDS */
+.sg2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px;}
+.sg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:11px;}
+.sg4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:11px;}
+.sc{border-radius:13px;padding:13px 12px;border:1px solid var(--border);background:var(--surface);}
+.sc.rose{background:var(--rose);border-color:var(--rose);}
+.sc.navy{background:var(--navy);border-color:var(--navy);}
+.sc.green{background:var(--green);border-color:var(--green);}
+.sc.amber{background:var(--amber);border-color:var(--amber);}
+.sc.purple{background:var(--purple);border-color:var(--purple);}
+.slbl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.sval{font-family:'DM Serif Display',serif;font-size:26px;color:var(--charcoal);line-height:1;}
+.ssub{font-size:10px;color:var(--soft-gray);margin-top:2px;}
+.sc.rose .slbl,.sc.rose .ssub,.sc.navy .slbl,.sc.navy .ssub,.sc.green .slbl,.sc.green .ssub,.sc.amber .slbl,.sc.amber .ssub,.sc.purple .slbl,.sc.purple .ssub{color:rgba(255,255,255,.68);}
+.sc.rose .sval,.sc.navy .sval,.sc.green .sval,.sc.amber .sval,.sc.purple .sval{color:#fff;}
+
+/* PBAR */
+.pbar{background:var(--blush-pale);border-radius:100px;height:5px;overflow:hidden;margin-bottom:4px;}
+.pf{height:100%;border-radius:100px;background:var(--rose);transition:width .5s;}
+.pf.b{background:var(--navy);}
+.pf.s{background:var(--sky);}
+.pf.g{background:var(--green);}
+.pf.a{background:var(--amber);}
+.pbar-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);}
+
+/* REMINDER */
+.reminder{background:linear-gradient(120deg,var(--blush-pale),var(--sky-pale));border:1px solid var(--blush-light);border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:10px;margin-bottom:13px;}
+.ri{font-size:19px;flex-shrink:0;}
+.rtitle{font-size:13px;font-weight:500;}
+.rsub{font-size:11px;color:var(--soft-gray);margin-top:1px;}
+
+/* ── CATEGORY FILTER CHIPS ── */
+.cat-filter{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px;}
+.cat-chip-btn{padding:6px 13px;border-radius:100px;border:1px solid var(--border);background:var(--surface);font-size:11px;color:var(--soft-gray);cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .15s;}
+.cat-chip-btn.active{background:var(--rose);border-color:var(--rose);color:#fff;}
+.cat-chip-btn.flow{border-color:#E8A87C;color:#C4693A;}
+.cat-chip-btn.flow.active{background:#C4693A;border-color:#C4693A;color:#fff;}
+.cat-chip-btn.retail{border-color:var(--navy);color:var(--navy);}
+.cat-chip-btn.retail.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+
+/* GOAL CARDS */
+.goal-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:9px;cursor:pointer;transition:transform .15s;border-left:3px solid var(--blush);}
+.goal-card:active{transform:scale(.98);}
+.goal-card.done-card{opacity:.55;}
+.goal-card.cat-flow{border-left-color:#C4693A;}
+.goal-card.cat-retail{border-left-color:var(--navy);}
+.goal-card.cat-other{border-left-color:var(--green);}
+.cat-label-inline{display:inline-flex;align-items:center;gap:3px;font-size:9px;padding:2px 7px;border-radius:100px;margin-right:4px;}
+.cat-label-inline.flow{background:#FBF0E0;color:#C4693A;}
+.cat-label-inline.retail{background:var(--navy-pale);color:var(--navy);}
+.cat-label-inline.other{background:var(--green-pale);color:var(--green);}
+.goal-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;}
+.goal-name{font-size:14px;font-weight:500;margin-bottom:3px;line-height:1.3;}
+.goal-meta-row{display:flex;align-items:center;flex-wrap:wrap;gap:4px;}
+.tag-chip{font-size:9px;padding:2px 7px;border-radius:100px;background:var(--sky-pale);color:var(--navy);}
+.gdn{font-family:'DM Serif Display',serif;font-size:22px;color:var(--rose);line-height:1;text-align:right;}
+.gdl{font-size:9px;color:var(--muted);text-align:right;}
+
+/* SUBTASKS */
+.st-list{margin-top:9px;border-top:1px solid var(--border);padding-top:9px;}
+.st-item{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border);}
+.st-item:last-child{border-bottom:none;}
+.st-chk{width:16px;height:16px;border:1.5px solid var(--border);border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;transition:all .2s;}
+.st-chk.done{background:transparent;border-color:transparent;font-size:13px;}
+.st-txt{font-size:12px;flex:1;}
+.st-txt.done{text-decoration:line-through;color:var(--muted);}
+
+/* PRIORITY */
+.pri{font-size:9px;padding:2px 7px;border-radius:100px;flex-shrink:0;}
+.pri.high{background:#FDECEA;color:#C0392B;}
+.pri.mid{background:var(--amber-pale);color:var(--amber);}
+.pri.low{background:var(--green-pale);color:var(--green);}
+
+/* TODO */
+.tsec-label{font-size:10px;color:var(--muted);font-weight:500;letter-spacing:.05em;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.todo-item{display:flex;align-items:flex-start;gap:9px;padding:11px 0;border-bottom:1px solid var(--border);}
+.todo-item:last-child{border-bottom:none;}
+.todo-chk{width:19px;height:19px;border:1.5px solid var(--border);border-radius:50%;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .2s;margin-top:1px;}
+.todo-chk.done{background:transparent;border-color:transparent;font-size:17px;line-height:1;}
+.todo-body{flex:1;}
+.todo-txt{font-size:13px;line-height:1.4;}
+.todo-txt.done{text-decoration:line-through;color:var(--muted);}
+.todo-row2{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px;align-items:center;}
+.due-ok{font-size:9px;padding:2px 7px;border-radius:100px;background:var(--navy-pale);color:var(--navy);}
+.due-warn{font-size:9px;padding:2px 7px;border-radius:100px;background:var(--amber-pale);color:var(--amber);}
+.due-over{font-size:9px;padding:2px 7px;border-radius:100px;background:var(--rose-pale);color:var(--rose);}
+.rep-badge{font-size:9px;padding:2px 7px;border-radius:100px;background:var(--sky-pale);color:var(--navy);}
+.todo-tag{font-size:9px;padding:2px 7px;border-radius:100px;background:var(--sky-pale);color:var(--navy);}
+.del-btn{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:3px;flex-shrink:0;}
+
+/* QUICK ADD */
+.quick-add{display:flex;gap:7px;margin-bottom:13px;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:9px 13px;align-items:center;}
+.quick-input{flex:1;background:transparent;border:none;font-family:'Noto Sans TC',sans-serif;font-size:13px;color:var(--charcoal);outline:none;}
+.quick-input::placeholder{color:var(--muted);}
+.quick-send{width:30px;height:30px;background:var(--rose);border:none;border-radius:8px;color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* HABITS */
+.habit-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:9px;}
+.habit-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.habit-info{display:flex;align-items:center;gap:9px;}
+.habit-emoji{font-size:20px;width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--blush-pale);flex-shrink:0;}
+.habit-name{font-size:13px;font-weight:500;margin-bottom:1px;}
+.habit-streak{font-size:10px;color:var(--rose);}
+.habit-chk-btn{width:38px;height:38px;border-radius:12px;border:2px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;flex-shrink:0;}
+.habit-chk-btn.checked{background:transparent;border-color:var(--green);font-size:20px;}
+.habit-week{display:flex;gap:4px;}
+.hday{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.hday-lbl{font-size:9px;color:var(--muted);}
+.hdot{width:100%;aspect-ratio:1;border-radius:5px;background:var(--border);}
+.hdot.done{background:var(--green);}
+.hdot.today{background:var(--rose);}
+
+/* ══ CRM ══ */
+.crm-filter{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px;}
+.crm-filter::-webkit-scrollbar{display:none;}
+.status-chip{padding:6px 12px;border-radius:100px;border:1px solid var(--border);font-size:11px;color:var(--soft-gray);cursor:pointer;white-space:nowrap;font-family:'Noto Sans TC',sans-serif;transition:all .15s;background:var(--surface);}
+.status-chip.active{color:#fff;}
+.status-chip.all.active{background:var(--charcoal);border-color:var(--charcoal);}
+.status-chip.lead.active{background:var(--amber);border-color:var(--amber);}
+.status-chip.regular.active{background:var(--green);border-color:var(--green);}
+.status-chip.return.active{background:var(--navy);border-color:var(--navy);}
+.status-chip.vip.active{background:var(--rose);border-color:var(--rose);}
+
+.crm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:13px;}
+.crm-stat{border-radius:12px;padding:11px 10px;border:1px solid var(--border);background:var(--surface);text-align:center;}
+.crm-stat-val{font-family:'DM Serif Display',serif;font-size:22px;color:var(--charcoal);line-height:1;}
+.crm-stat-lbl{font-size:9px;color:var(--muted);margin-top:2px;}
+
+.crm-search{display:flex;gap:7px;margin-bottom:11px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:9px 13px;align-items:center;}
+.crm-search-input{flex:1;background:transparent;border:none;font-family:'Noto Sans TC',sans-serif;font-size:13px;color:var(--charcoal);outline:none;}
+.crm-search-input::placeholder{color:var(--muted);}
+
+.cust-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:9px;cursor:pointer;transition:transform .15s;}
+.cust-card:active{transform:scale(.98);}
+.cust-top{display:flex;align-items:center;gap:11px;margin-bottom:9px;}
+.cust-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;color:#fff;flex-shrink:0;font-family:'DM Serif Display',serif;}
+.cust-name{font-size:14px;font-weight:500;margin-bottom:2px;}
+.cust-meta{font-size:11px;color:var(--muted);}
+.status-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:3px 9px;border-radius:100px;}
+.sb-lead{background:var(--amber-pale);color:var(--amber);}
+.sb-regular{background:var(--green-pale);color:var(--green);}
+.sb-return{background:var(--navy-pale);color:var(--navy);}
+.sb-vip{background:var(--rose-pale);color:var(--rose);}
+.cust-bottom{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.src-badge{font-size:9px;padding:2px 8px;border-radius:100px;background:var(--sky-pale);color:var(--navy);}
+.purchase-badge{font-size:9px;padding:2px 8px;border-radius:100px;background:var(--purple-pale);color:var(--purple);}
+
+/* CRM DETAIL */
+.detail-section{margin-bottom:14px;}
+.detail-section-title{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.detail-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border);}
+.detail-row:last-child{border-bottom:none;}
+.detail-key{font-size:12px;color:var(--soft-gray);flex-shrink:0;width:72px;}
+.detail-val{font-size:13px;color:var(--charcoal);text-align:right;flex:1;word-break:break-all;}
+
+.purchase-item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
+.purchase-item:last-child{border-bottom:none;}
+.pi-name{font-size:13px;font-weight:500;}
+.pi-meta{font-size:11px;color:var(--muted);margin-top:1px;}
+.pi-amount{font-family:'DM Serif Display',serif;font-size:16px;color:var(--rose);}
+
+.follow-up-item{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);}
+.follow-up-item:last-child{border-bottom:none;}
+.fu-dot{width:8px;height:8px;border-radius:50%;background:var(--sky);flex-shrink:0;margin-top:5px;}
+.fu-dot.done{background:var(--green);}
+.fu-text{font-size:12px;flex:1;line-height:1.4;}
+.fu-date{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* BIG COUNTDOWN */
+.big-cd{background:linear-gradient(135deg,var(--navy),var(--rose));border-radius:16px;padding:24px 18px;text-align:center;color:#fff;margin-bottom:12px;}
+.big-cd-num{font-family:'DM Serif Display',serif;font-size:60px;line-height:1;}
+.big-cd-lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.74;margin-top:3px;}
+
+/* REVIEW */
+.review-q{margin-bottom:13px;}
+.review-q label{display:block;font-size:11px;color:var(--soft-gray);margin-bottom:5px;}
+.review-ta{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-family:'Noto Sans TC',sans-serif;font-size:13px;color:var(--charcoal);resize:none;min-height:70px;outline:none;transition:border-color .2s;}
+.review-ta:focus{border-color:var(--sky);}
+.rh-item{padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.rh-item:last-child{border-bottom:none;}
+.rh-date{font-size:10px;color:var(--muted);margin-bottom:2px;}
+.rh-title{font-size:13px;font-weight:500;}
+.rh-preview{font-size:11px;color:var(--soft-gray);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+/* AI */
+.ai-hero{background:linear-gradient(135deg,var(--navy),#5C7BA8);border-radius:16px;padding:20px 16px;margin-bottom:12px;color:#fff;}
+.ai-hero-title{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:4px;}
+.ai-hero-sub{font-size:11px;opacity:.74;line-height:1.5;}
+.ai-mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:11px;}
+.ai-mode-btn{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 11px;cursor:pointer;text-align:left;transition:all .15s;font-family:'Noto Sans TC',sans-serif;}
+.ai-mode-btn.active{border-color:var(--navy);background:var(--navy-pale);}
+.ai-mode-icon{font-size:19px;margin-bottom:5px;}
+.ai-mode-title{font-size:12px;font-weight:500;color:var(--charcoal);margin-bottom:1px;}
+.ai-mode-sub{font-size:10px;color:var(--muted);}
+.ai-chat-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:11px;}
+.ai-chat-hdr{display:flex;align-items:center;gap:7px;padding:11px 13px;border-bottom:1px solid var(--border);background:var(--navy-pale);}
+.ai-chat-dot{width:6px;height:6px;border-radius:50%;background:var(--navy);}
+.ai-chat-name{font-size:11px;font-weight:500;color:var(--navy);}
+.ai-msgs{padding:11px;min-height:90px;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;}
+.ai-msg{max-width:88%;padding:9px 12px;border-radius:12px;font-size:12px;line-height:1.55;white-space:pre-wrap;}
+.ai-msg.ai{background:var(--navy-pale);color:var(--charcoal);align-self:flex-start;border-bottom-left-radius:3px;}
+.ai-msg.user{background:var(--rose);color:#fff;align-self:flex-end;border-bottom-right-radius:3px;}
+.ld span{width:6px;height:6px;border-radius:50%;background:var(--navy);opacity:.4;animation:bounce 1.2s infinite;display:inline-block;margin:0 2px;}
+.ld span:nth-child(2){animation-delay:.2s;}
+.ld span:nth-child(3){animation-delay:.4s;}
+@keyframes bounce{0%,80%,100%{opacity:.4;transform:scale(1);}40%{opacity:1;transform:scale(1.2);}}
+.ai-input-row{display:flex;gap:6px;padding:9px 11px;border-top:1px solid var(--border);background:var(--bg);}
+.ai-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:8px 13px;font-family:'Noto Sans TC',sans-serif;font-size:12px;color:var(--charcoal);outline:none;}
+.ai-input:focus{border-color:var(--sky);}
+.ai-send{width:34px;height:34px;background:var(--navy);border:none;border-radius:50%;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ai-quick-btns{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.ai-quick{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:6px 11px;font-size:10px;color:var(--soft-gray);cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+.ai-quick:active{background:var(--navy-pale);color:var(--navy);border-color:var(--navy);}
+
+/* SETTINGS */
+.set-sec-lbl{font-size:9px;font-weight:500;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:14px 0 6px;}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.set-row:last-child{border-bottom:none;}
+.set-lbl{font-size:13px;}
+.set-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+.toggle{width:38px;height:21px;background:var(--border);border-radius:100px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--rose);}
+.toggle::after{content:'';position:absolute;width:15px;height:15px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.15);}
+.toggle.on::after{transform:translateX(17px);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;background:var(--rose);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:12px;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:opacity .2s;}
+.btn:active{opacity:.82;}
+.btn.full{width:100%;}
+.btn.navy{background:var(--navy);}
+.btn.green{background:var(--green);}
+.btn.ghost{background:transparent;color:var(--soft-gray);border:1px solid var(--border);}
+.btn.sm{padding:6px 12px;font-size:11px;border-radius:8px;}
+
+/* FAB */
+.fab{position:fixed;right:17px;bottom:calc(var(--tab-h) + var(--safe-bot) + 13px);width:48px;height:48px;border-radius:14px;background:var(--rose);color:#fff;border:none;font-size:22px;cursor:pointer;box-shadow:0 4px 16px rgba(176,85,83,.36);display:none;align-items:center;justify-content:center;z-index:50;transition:transform .15s;}
+.fab:active{transform:scale(.93);}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(44,44,44,.3);backdrop-filter:blur(5px);z-index:300;align-items:flex-end;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;padding:16px 18px;width:100%;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(16px + var(--safe-bot));}
+.modal-handle{width:32px;height:4px;background:var(--border);border-radius:100px;margin:0 auto 16px;}
+.modal h3{font-family:'DM Serif Display',serif;font-size:19px;font-weight:400;margin-bottom:16px;}
+.fg{margin-bottom:11px;}
+.fl{display:block;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.fi{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-family:'Noto Sans TC',sans-serif;font-size:13px;color:var(--charcoal);outline:none;transition:border-color .2s;-webkit-appearance:none;}
+.fi:focus{border-color:var(--sky);}
+.frow{display:flex;gap:8px;}
+.frow .fg{flex:1;}
+.modal-acts{display:flex;gap:7px;margin-top:16px;}
+.modal-acts .btn{flex:1;padding:11px;font-size:13px;}
+.seg{display:flex;background:var(--bg);border-radius:9px;padding:3px;gap:2px;border:1px solid var(--border);}
+.seg-btn{flex:1;padding:6px 4px;border:none;background:transparent;border-radius:7px;font-size:11px;font-family:'Noto Sans TC',sans-serif;color:var(--muted);cursor:pointer;transition:all .15s;}
+.seg-btn.active{background:var(--surface);color:var(--charcoal);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
+/* BACK */
+.back-btn{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--soft-gray);background:none;border:none;font-family:'Noto Sans TC',sans-serif;cursor:pointer;padding:5px 0;margin-bottom:13px;}
+.back-btn:active{color:var(--rose);}
+.empty{text-align:center;padding:36px 16px;color:var(--muted);font-size:12px;}
+.empty-icon{font-size:24px;margin-bottom:8px;}
+
+/* SWIPE TO DELETE */
+.swipe-wrap{position:relative;overflow:hidden;border-radius:14px;margin-bottom:9px;}
+.swipe-wrap .swipe-delete-bg{position:absolute;inset:0;background:var(--rose);display:flex;align-items:center;padding-left:22px;gap:7px;color:#fff;font-size:13px;border-radius:14px;pointer-events:none;opacity:0;transition:opacity .15s;}
+.swipe-wrap .swipe-delete-bg .sd-icon{font-size:18px;}
+.swipe-wrap .swipe-inner{position:relative;transform:translateX(0);transition:transform .25s cubic-bezier(.25,.46,.45,.94);will-change:transform;background:var(--surface);border-radius:14px;}
+.swipe-wrap .swipe-inner.swiping{transition:none;}
+.swipe-wrap.revealing .swipe-delete-bg{opacity:1;}
+.swipe-wrap .swipe-inner.snap-back{transform:translateX(0)!important;transition:transform .3s cubic-bezier(.25,.46,.45,.94);}
+.swipe-wrap .swipe-inner.snap-delete{transform:translateX(110%)!important;transition:transform .28s cubic-bezier(.55,.06,.68,.19);}
+/* override margin on cards inside swipe-wrap */
+.swipe-wrap .goal-card,.swipe-wrap .habit-card,.swipe-wrap .cust-card{margin-bottom:0;border-radius:14px;}
+/* REVIEW CALENDAR */
+.rev-cal{width:100%;}
+.rev-cal-header{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:5px;}
+.rev-cal-day-lbl{font-size:9px;color:var(--muted);text-align:center;padding:2px 0;}
+.rev-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.rcd{aspect-ratio:1;border-radius:5px;background:var(--blush-pale);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);cursor:pointer;transition:transform .15s;position:relative;}
+.rcd:active{transform:scale(.92);}
+.rcd.today{border:1.5px solid var(--rose);}
+.rcd.future{opacity:.3;cursor:default;}
+.rcd.empty{background:transparent;cursor:default;}
+.rcd.has-daily{background:var(--sky);color:#fff;}
+.rcd.has-weekly{background:var(--navy);color:#fff;}
+.rcd.has-monthly{background:var(--rose);color:#fff;}
+.rcd.has-multi{background:linear-gradient(135deg,var(--rose),var(--navy));color:#fff;}
+.rcd-tip{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--charcoal);color:#fff;font-size:10px;padding:4px 8px;border-radius:7px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:99;}
+.rcd:hover .rcd-tip,.rcd:active .rcd-tip{opacity:1;}
+.rev-cal-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;}
+.rcl-item{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--muted);}
+.rcl-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-mark">目</div>
+    <div class="logo-title">目標管理</div>
+  </div>
+  <div class="header-right" id="hdate"></div>
+</header>
+
+<div class="scroll" id="scroll">
+
+<!-- ① 總覽 -->
+<div class="page active" id="page-home">
+  <div class="pg-label">Overview</div>
+  <div class="pg-title">你好 👋</div>
+  <div class="pg-sub" id="home-sub"></div>
+  <div class="reminder"><div class="ri">🔔</div><div><div class="rtitle">今日提醒</div><div class="rsub" id="rsub"></div></div></div>
+  <div class="sg4">
+    <div class="sc rose"><div class="slbl">目標</div><div class="sval" id="sc-goals">0</div><div class="ssub">進行中</div></div>
+    <div class="sc navy"><div class="slbl">待辦</div><div class="sval" id="sc-done">0</div><div class="ssub">今日完成</div></div>
+    <div class="sc green"><div class="slbl">習慣</div><div class="sval" id="sc-habits">0</div><div class="ssub">今日打卡</div></div>
+    <div class="sc amber"><div class="slbl">顧客</div><div class="sval" id="sc-custs">0</div><div class="ssub">總計</div></div>
+  </div>
+  <div class="card"><div class="card-label">目標進度</div><div id="home-progress"></div></div>
+  <div class="card"><div class="card-label">本月覆盤紀錄</div><div id="home-streak"></div></div>
+</div>
+
+<!-- ② 目標 -->
+<div class="page" id="page-goals">
+  <div class="pg-label">Goals</div>
+  <div class="pg-title">我的目標</div>
+  <div class="cat-filter">
+    <button class="cat-chip-btn active" id="cf-all" onclick="filterGoals('all')">全部</button>
+    <button class="cat-chip-btn flow" id="cf-flow" onclick="filterGoals('引流')">📣 引流</button>
+    <button class="cat-chip-btn retail" id="cf-retail" onclick="filterGoals('零售')">🛍 零售</button>
+    <button class="cat-chip-btn" id="cf-other" onclick="filterGoals('其他')">其他</button>
+  </div>
+  <div style="margin-bottom:12px;"><button class="btn sm" onclick="openGoalModal()">＋ 新增目標</button></div>
+  <div id="goals-list"></div>
+</div>
+
+<!-- 目標詳情 -->
+<div class="page" id="page-goal-detail">
+  <button class="back-btn" onclick="showPage('goals')">← 返回</button>
+  <div id="goal-detail-content"></div>
+</div>
+
+<!-- ③ 待辦 -->
+<div class="page" id="page-todo">
+  <div class="pg-label" id="todo-label"></div>
+  <div class="pg-title">今日待辦</div>
+  <div class="quick-add">
+    <span style="font-size:15px;color:var(--muted);">＋</span>
+    <input class="quick-input" id="quick-input" placeholder="快速新增待辦…" onkeydown="if(event.key==='Enter')quickAdd()">
+    <button class="quick-send" onclick="quickAdd()">↑</button>
+  </div>
+  <div id="todo-overdue-sec" style="display:none;"><div class="tsec-label"><span style="color:var(--rose);">⚠</span>已逾期</div><div class="card" style="padding:0 14px;"><div id="todo-overdue"></div></div><div style="height:8px;"></div></div>
+  <div class="tsec-label">📅 今天</div>
+  <div class="card" style="padding:0 14px;"><div id="todo-today"></div></div>
+  <div id="todo-future-sec" style="display:none;margin-top:9px;"><div class="tsec-label">🗓 即將到來</div><div class="card" style="padding:0 14px;"><div id="todo-future"></div></div></div>
+</div>
+
+<!-- ④ 習慣 -->
+<div class="page" id="page-habits">
+  <div class="pg-label">Habits</div>
+  <div class="pg-title">習慣追蹤</div>
+  <div class="pg-sub">每天打卡，建立好習慣</div>
+  <div style="margin-bottom:12px;"><button class="btn sm" onclick="openHabitModal()">＋ 新增習慣</button></div>
+  <div id="habits-list"></div>
+</div>
+
+<!-- ⑤ 顧客 CRM -->
+<div class="page" id="page-crm">
+  <div class="pg-label">Customers</div>
+  <div class="pg-title">顧客管理</div>
+  <div class="crm-stats">
+    <div class="crm-stat"><div class="crm-stat-val" id="crm-total">0</div><div class="crm-stat-lbl">全部</div></div>
+    <div class="crm-stat"><div class="crm-stat-val" id="crm-lead">0</div><div class="crm-stat-lbl" style="color:var(--amber);">潛在客</div></div>
+    <div class="crm-stat"><div class="crm-stat-val" id="crm-regular">0</div><div class="crm-stat-lbl" style="color:var(--green);">老客</div></div>
+    <div class="crm-stat"><div class="crm-stat-val" id="crm-return">0</div><div class="crm-stat-lbl" style="color:var(--navy);">待回購</div></div>
+  </div>
+  <div class="crm-filter" id="crm-filter">
+    <button class="status-chip all active" onclick="filterCRM('all')">全部</button>
+    <button class="status-chip lead" onclick="filterCRM('lead')">🌱 潛在客</button>
+    <button class="status-chip regular" onclick="filterCRM('regular')">⭐ 老客</button>
+    <button class="status-chip return" onclick="filterCRM('return')">🔄 待回購</button>
+    <button class="status-chip vip" onclick="filterCRM('vip')">👑 VIP</button>
+  </div>
+  <div class="crm-search">
+    <span style="font-size:14px;color:var(--muted);">🔍</span>
+    <input class="crm-search-input" id="crm-search" placeholder="搜尋顧客姓名或備註…" oninput="renderCRM()">
+  </div>
+  <div id="crm-list"></div>
+</div>
+
+<!-- 顧客詳情 -->
+<div class="page" id="page-cust-detail">
+  <button class="back-btn" onclick="showPage('crm')">← 返回</button>
+  <div id="cust-detail-content"></div>
+</div>
+
+<!-- ⑥ 覆盤 -->
+<div class="page" id="page-review-menu">
+  <div class="pg-label">Review</div>
+  <div class="pg-title">覆盤</div>
+  <div class="pg-sub">記錄成長、查看歷史</div>
+  <div class="card" style="padding:0;overflow:hidden;" id="review-menu-cards"></div>
+  <div style="height:16px;"></div>
+  <div class="pg-label">歷史紀錄</div>
+  <div class="card" style="padding:0 14px;" id="review-history-list"></div>
+</div>
+<div class="page" id="page-review-write">
+  <button class="back-btn" onclick="showPage('review-menu')">← 覆盤選單</button>
+  <div class="pg-label" id="rw-label"></div>
+  <div class="pg-title" id="rw-title"></div>
+  <div class="pg-sub" id="rw-sub"></div>
+  <div class="card" id="rw-form"></div>
+</div>
+<div class="page" id="page-review-detail">
+  <button class="back-btn" onclick="showPage('review-menu')">← 歷史紀錄</button>
+  <div id="review-detail-content"></div>
+</div>
+
+<!-- ⑦ AI -->
+<div class="page" id="page-ai">
+  <div class="ai-hero"><div class="ai-hero-title">✦ AI 目標助理</div><div class="ai-hero-sub">分析進度、陪你覆盤、生成待辦、顧客建議</div></div>
+  <div class="ai-mode-grid">
+    <button class="ai-mode-btn active" id="mode-analyze" onclick="setAIMode('analyze')"><div class="ai-mode-icon">📊</div><div class="ai-mode-title">目標分析</div><div class="ai-mode-sub">進度建議</div></button>
+    <button class="ai-mode-btn" id="mode-review" onclick="setAIMode('review')"><div class="ai-mode-icon">🪞</div><div class="ai-mode-title">覆盤助理</div><div class="ai-mode-sub">引導反思</div></button>
+    <button class="ai-mode-btn" id="mode-todo" onclick="setAIMode('todo')"><div class="ai-mode-icon">✦</div><div class="ai-mode-title">生成待辦</div><div class="ai-mode-sub">拆解任務</div></button>
+    <button class="ai-mode-btn" id="mode-crm" onclick="setAIMode('crm')"><div class="ai-mode-icon">🛍</div><div class="ai-mode-title">顧客策略</div><div class="ai-mode-sub">銷售建議</div></button>
+  </div>
+  <div class="ai-quick-btns" id="ai-quick-btns"></div>
+  <div class="ai-chat-box">
+    <div class="ai-chat-hdr"><div class="ai-chat-dot"></div><div class="ai-chat-name">AI 助理</div><button onclick="clearAI()" style="margin-left:auto;background:none;border:none;font-size:10px;color:var(--muted);cursor:pointer;font-family:'Noto Sans TC',sans-serif;">清除</button></div>
+    <div class="ai-msgs" id="ai-msgs"></div>
+    <div class="ai-input-row"><input class="ai-input" id="ai-input" placeholder="輸入訊息…" onkeydown="if(event.key==='Enter')sendAI()"><button class="ai-send" onclick="sendAI()">↑</button></div>
+  </div>
+</div>
+
+<!-- ⑧ 設定 -->
+<div class="page" id="page-settings">
+  <div class="pg-label">Settings</div><div class="pg-title">設定</div>
+  <div class="set-sec-lbl">提醒</div>
+  <div class="card" style="padding:0 14px;">
+    <div class="set-row"><div><div class="set-lbl">每日早晨提醒</div><div class="set-sub">早上 8 點</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="set-row"><div><div class="set-lbl">晚間覆盤提醒</div><div class="set-sub">晚上 9 點</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="set-row"><div><div class="set-lbl">習慣打卡提醒</div><div class="set-sub">每天下午 8 點</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="set-row"><div><div class="set-lbl">目標截止 D-7</div><div class="set-sub">截止前 7 天</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="set-row"><div><div class="set-lbl">顧客回購提醒</div><div class="set-sub">待回購顧客每週提醒</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+  </div>
+  <div class="set-sec-lbl">應用程式</div>
+  <div class="card" style="padding:0 14px;">
+    <div class="set-row"><div><div class="set-lbl">完成動畫效果</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+    <div class="set-row"><div><div class="set-lbl">深色模式</div><div class="set-sub">即將推出</div></div><div class="toggle" style="opacity:.4;pointer-events:none;"></div></div>
+  </div>
+</div>
+
+</div><!-- end scroll -->
+
+<button class="fab" id="fab" onclick="onFab()">＋</button>
+
+<nav class="tabs">
+  <button class="tab active" id="tab-home"    onclick="showPage('home')"><span class="ti">◈</span><span class="tl">總覽</span></button>
+  <button class="tab" id="tab-goals"   onclick="showPage('goals')"><span class="ti">◎</span><span class="tl">目標</span></button>
+  <button class="tab" id="tab-todo"    onclick="showPage('todo')"><span class="ti">✦</span><span class="tl">待辦</span><span class="tbadge" id="tbadge" style="display:none"></span></button>
+  <button class="tab" id="tab-habits"  onclick="showPage('habits')"><span class="ti">🔥</span><span class="tl">習慣</span></button>
+  <button class="tab" id="tab-crm"     onclick="showPage('crm')"><span class="ti">👥</span><span class="tl">顧客</span></button>
+  <button class="tab" id="tab-review-menu" onclick="showPage('review-menu')"><span class="ti">◇</span><span class="tl">覆盤</span></button>
+  <button class="tab" id="tab-ai"      onclick="showPage('ai')"><span class="ti">✧</span><span class="tl">AI</span></button>
+</nav>
+</div>
+
+<!-- GOAL MODAL -->
+<div class="overlay" id="goal-modal">
+<div class="modal">
+  <div class="modal-handle"></div>
+  <h3 id="goal-modal-title">新增目標</h3>
+  <div class="fg"><label class="fl">目標名稱</label><input class="fi" id="gf-name" placeholder="例：IG 漲粉 1000、本月業績 5 萬"></div>
+  <div class="frow">
+    <div class="fg">
+      <label class="fl">分類</label>
+      <select class="fi" id="gf-cat">
+        <option value="引流">📣 引流</option>
+        <option value="零售">🛍 零售</option>
+        <option value="自我成長">📚 自我成長</option>
+        <option value="健康">💪 健康</option>
+        <option value="其他">其他</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">標籤（逗號分隔）</label><input class="fi" id="gf-tags" placeholder="IG,業績…"></div>
+  </div>
+  <div class="frow">
+    <div class="fg"><label class="fl">開始</label><input class="fi" id="gf-start" type="date"></div>
+    <div class="fg"><label class="fl">截止</label><input class="fi" id="gf-end" type="date"></div>
+  </div>
+  <div class="fg"><label class="fl">說明</label><textarea class="review-ta" id="gf-desc" style="min-height:50px;" placeholder="具體說明…"></textarea></div>
+  <div class="fg"><label class="fl">子任務（每行一個）</label><textarea class="review-ta" id="gf-subs" style="min-height:50px;" placeholder="每天發一篇 IG 貼文&#10;每週聯繫 10 位潛在客"></textarea></div>
+  <div class="modal-acts">
+    <button class="btn ghost" onclick="closeGoalModal()">取消</button>
+    <button class="btn" onclick="saveGoal()">儲存</button>
+  </div>
+</div>
+</div>
+
+<!-- TODO MODAL -->
+<div class="overlay" id="todo-modal">
+<div class="modal">
+  <div class="modal-handle"></div>
+  <h3>新增待辦</h3>
+  <div class="fg"><label class="fl">事項</label><input class="fi" id="tf-text" placeholder="今天想完成什麼？"></div>
+  <div class="frow">
+    <div class="fg"><label class="fl">截止日期</label><input class="fi" id="tf-due" type="date"></div>
+    <div class="fg"><label class="fl">關聯目標</label><input class="fi" id="tf-goal" placeholder="選填…"></div>
+  </div>
+  <div class="fg"><label class="fl">優先順序</label>
+    <div class="seg">
+      <button class="seg-btn" id="pri-high" onclick="setPri('high')">🔴 高</button>
+      <button class="seg-btn active" id="pri-mid" onclick="setPri('mid')">🟡 中</button>
+      <button class="seg-btn" id="pri-low" onclick="setPri('low')">🟢 低</button>
+    </div>
+  </div>
+  <div class="fg"><label class="fl">重複</label>
+    <div class="seg">
+      <button class="seg-btn active" id="rep-none" onclick="setRep('none')">不重複</button>
+      <button class="seg-btn" id="rep-daily" onclick="setRep('daily')">每天</button>
+      <button class="seg-btn" id="rep-weekly" onclick="setRep('weekly')">每週</button>
+    </div>
+  </div>
+  <div class="modal-acts">
+    <button class="btn ghost" onclick="closeTodoModal()">取消</button>
+    <button class="btn" onclick="saveTodo()">新增</button>
+  </div>
+</div>
+</div>
+
+<!-- HABIT MODAL -->
+<div class="overlay" id="habit-modal">
+<div class="modal">
+  <div class="modal-handle"></div>
+  <h3>新增習慣</h3>
+  <div class="fg"><label class="fl">習慣名稱</label><input class="fi" id="hf-name" placeholder="例：每天閱讀、發 IG 貼文…"></div>
+  <div class="fg"><label class="fl">選擇圖示</label><div style="display:flex;gap:7px;flex-wrap:wrap;" id="emoji-picker"><span id="hf-emoji" style="display:none">📚</span></div></div>
+  <div class="modal-acts">
+    <button class="btn ghost" onclick="closeHabitModal()">取消</button>
+    <button class="btn" onclick="saveHabit()">新增</button>
+  </div>
+</div>
+</div>
+
+<!-- CUSTOMER MODAL -->
+<div class="overlay" id="cust-modal">
+<div class="modal">
+  <div class="modal-handle"></div>
+  <h3 id="cust-modal-title">新增顧客</h3>
+  <div class="frow">
+    <div class="fg"><label class="fl">姓名 / 暱稱</label><input class="fi" id="cf-name" placeholder="陳小姐"></div>
+    <div class="fg"><label class="fl">聯絡方式</label><input class="fi" id="cf-contact" placeholder="IG @xxx / 手機"></div>
+  </div>
+  <div class="frow">
+    <div class="fg">
+      <label class="fl">來源</label>
+      <select class="fi" id="cf-source">
+        <option>IG</option>
+        <option>小紅書</option>
+        <option>網路商店</option>
+        <option>朋友介紹</option>
+        <option>其他</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="fl">狀態</label>
+      <select class="fi" id="cf-status">
+        <option value="lead">🌱 潛在客</option>
+        <option value="regular">⭐ 老客</option>
+        <option value="return">🔄 待回購</option>
+        <option value="vip">👑 VIP</option>
+      </select>
+    </div>
+  </div>
+  <div class="fg"><label class="fl">購買紀錄（最近一筆）</label><input class="fi" id="cf-last-purchase" placeholder="例：玫瑰精油 x2，NT$880"></div>
+  <div class="fg"><label class="fl">喜好 / 標籤</label><input class="fi" id="cf-prefs" placeholder="例：喜歡香氛、敏感肌"></div>
+  <div class="fg"><label class="fl">備註</label><textarea class="review-ta" id="cf-note" style="min-height:50px;" placeholder="任何需要記住的事…"></textarea></div>
+  <div class="modal-acts">
+    <button class="btn ghost" onclick="closeCustModal()">取消</button>
+    <button class="btn" onclick="saveCust()">儲存</button>
+  </div>
+</div>
+</div>
+
+<!-- PURCHASE MODAL -->
+<div class="overlay" id="purchase-modal">
+<div class="modal">
+  <div class="modal-handle"></div>
+  <h3>新增購買紀錄</h3>
+  <div class="fg"><label class="fl">商品名稱</label><input class="fi" id="pf-item" placeholder="例：玫瑰精油 x2"></div>
+  <div class="frow">
+    <div class="fg"><label class="fl">金額（NT$）</label><input class="fi" id="pf-amount" type="number" placeholder="880"></div>
+    <div class="fg"><label class="fl">日期</label><input class="fi" id="pf-date" type="date"></div>
+  </div>
+  <div class="fg"><label class="fl">備註</label><input class="fi" id="pf-note" placeholder="選填…"></div>
+  <div class="modal-acts">
+    <button class="btn ghost" onclick="document.getElementById('purchase-modal').classList.remove('open')">取消</button>
+    <button class="btn" onclick="savePurchase()">新增</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ══ DATA ══
+const TODAY=()=>new Date().toISOString().split('T')[0];
+let goals   =JSON.parse(localStorage.getItem('gt7-goals')  ||'[]');
+let todos   =JSON.parse(localStorage.getItem('gt7-todos')  ||'[]');
+let habits  =JSON.parse(localStorage.getItem('gt7-habits') ||'[]');
+let reviews =JSON.parse(localStorage.getItem('gt7-reviews')||'[]');
+let customers=JSON.parse(localStorage.getItem('gt7-custs') ||'[]');
+
+const ad=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x.toISOString().split('T')[0];};
+
+// Seed goals
+if(!goals.length){
+  const t=TODAY();
+  goals=[
+    {id:1,name:'IG 漲粉 1000',category:'引流',tags:['IG','社群'],start:ad(t,-20),end:ad(t,40),desc:'每天發一篇優質貼文',progress:55,subtasks:[{id:101,text:'每天發 IG 限動',done:false},{id:102,text:'每週合作一位 KOL',done:true}],done:false},
+    {id:2,name:'本季業績 15 萬',category:'零售',tags:['業績'],start:ad(t,-10),end:ad(t,80),desc:'主推新品精油系列',progress:40,subtasks:[{id:201,text:'跟進 10 位潛在客',done:false},{id:202,text:'推出限時優惠活動',done:false}],done:false},
+    {id:3,name:'小紅書開帳號',category:'引流',tags:['小紅書'],start:ad(t,-5),end:ad(t,30),desc:'建立小紅書品牌形象',progress:20,subtasks:[],done:false},
+  ];
+  localStorage.setItem('gt7-goals',JSON.stringify(goals));
+}
+if(!todos.length){
+  const t=TODAY();
+  todos=[
+    {id:1,text:'發 IG 新品開箱貼文',done:false,goal:'IG 漲粉 1000',due:t,pri:'high',rep:'none'},
+    {id:2,text:'回覆顧客私訊',done:true,goal:'',due:t,pri:'high',rep:'daily'},
+    {id:3,text:'整理本週銷售數字',done:false,goal:'本季業績 15 萬',due:t,pri:'mid',rep:'weekly'},
+    {id:4,text:'聯繫 3 位潛在客戶',done:false,goal:'本季業績 15 萬',due:ad(t,1),pri:'high',rep:'none'},
+  ];
+  localStorage.setItem('gt7-todos',JSON.stringify(todos));
+}
+if(!habits.length){
+  habits=[
+    {id:1,name:'發 IG 限動',emoji:'📸',logs:{},streak:0},
+    {id:2,name:'回覆所有私訊',emoji:'💬',logs:{},streak:0},
+    {id:3,name:'記錄當天銷售',emoji:'📊',logs:{},streak:0},
+  ];
+  localStorage.setItem('gt7-habits',JSON.stringify(habits));
+}
+if(!customers.length){
+  customers=[
+    {id:1,name:'陳小姐',contact:'IG @chen_xx',source:'IG',status:'vip',lastPurchase:'玫瑰精油 x2，NT$880',prefs:'喜歡香氛、敏感肌',note:'每月固定回購，生日 3/15',purchases:[{id:1,item:'玫瑰精油 x2',amount:880,date:ad(TODAY(),-15),note:''}],color:'#B05553'},
+    {id:2,name:'林先生',contact:'小紅書 @lin_shop',source:'小紅書',status:'lead',lastPurchase:'',prefs:'送禮需求',note:'詢問過禮盒組合，尚未下單',purchases:[],color:'#3B567F'},
+    {id:3,name:'王小姐',contact:'手機 0912-xxx-xxx',source:'朋友介紹',status:'return',lastPurchase:'薰衣草香皂組，NT$450',prefs:'天然材質',note:'上次購買已超過 60 天，可主動聯繫',purchases:[{id:1,item:'薰衣草香皂組',amount:450,date:ad(TODAY(),-62),note:''}],color:'#6A9E72'},
+    {id:4,name:'黃小姐',contact:'IG @huang_life',source:'IG',status:'regular',lastPurchase:'橙花護手霜，NT$320',prefs:'平價、護膚',note:'',purchases:[{id:1,item:'橙花護手霜',amount:320,date:ad(TODAY(),-20),note:''}],color:'#7B68A4'},
+  ];
+  localStorage.setItem('gt7-custs',JSON.stringify(customers));
+}
+
+function save(){
+  localStorage.setItem('gt7-goals',  JSON.stringify(goals));
+  localStorage.setItem('gt7-todos',  JSON.stringify(todos));
+  localStorage.setItem('gt7-habits', JSON.stringify(habits));
+  localStorage.setItem('gt7-reviews',JSON.stringify(reviews));
+  localStorage.setItem('gt7-custs',  JSON.stringify(customers));
+}
+
+// ══ NAV ══
+let curPage='home';
+const TAB_MAP={home:'tab-home',goals:'tab-goals','goal-detail':'tab-goals',todo:'tab-todo',habits:'tab-habits',crm:'tab-crm','cust-detail':'tab-crm','review-menu':'tab-review-menu','review-write':'tab-review-menu','review-detail':'tab-review-menu',ai:'tab-ai',settings:'tab-settings'};
+const FAB_PAGES=new Set(['goals','todo','habits','crm']);
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const tid=TAB_MAP[id];if(tid)document.getElementById(tid).classList.add('active');
+  const fab=document.getElementById('fab');fab.style.display=FAB_PAGES.has(id)?'flex':'none';
+  document.getElementById('scroll').scrollTo({top:0});
+  curPage=id;
+  if(id==='home')renderHome();
+  if(id==='goals')renderGoals();
+  if(id==='todo')renderTodos();
+  if(id==='habits')renderHabits();
+  if(id==='crm')renderCRM();
+  if(id==='review-menu')renderReviewMenu();
+  if(id==='ai')initAI();
+}
+
+function onFab(){
+  const map={goals:openGoalModal,todo:openTodoModal,habits:openHabitModal,crm:openCustModal};
+  map[curPage]&&map[curPage]();
+}
+
+// ══ DATE ══
+function initDate(){
+  const n=new Date();
+  const zh=['日','一','二','三','四','五','六'];
+  const en=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  document.getElementById('hdate').innerHTML=`${n.getMonth()+1}/${n.getDate()} <span style="opacity:.6">${en[n.getDay()]}</span>`;
+  document.getElementById('home-sub').textContent=`${n.getFullYear()} 年 ${n.getMonth()+1} 月 ${n.getDate()} 日（週${zh[n.getDay()]}）`;
+  document.getElementById('todo-label').textContent=`${n.getMonth()+1}/${n.getDate()} 週${zh[n.getDay()]}`;
+}
+function daysLeft(s){return Math.ceil((new Date(s)-new Date())/86400000);}
+function dueBadge(due,done){if(!due||done)return'';const d=daysLeft(due);if(d<0)return`<span class="due-over">逾期 ${Math.abs(d)} 天</span>`;if(d===0)return`<span class="due-warn">今天截止</span>`;if(d===1)return`<span class="due-warn">明天截止</span>`;return`<span class="due-ok">${due}</span>`;}
+function priBadge(p){if(p==='high')return`<span class="pri high">高優先</span>`;if(p==='low')return`<span class="pri low">低優先</span>`;return'';}
+function repBadge(r){if(r==='daily')return`<span class="rep-badge">每天</span>`;if(r==='weekly')return`<span class="rep-badge">每週</span>`;return'';}
+
+// ══ HOME ══
+function renderHome(){
+  document.getElementById('sc-goals').textContent=goals.filter(g=>!g.done).length;
+  document.getElementById('sc-done').textContent=todos.filter(t=>t.done).length;
+  const today=TODAY();
+  document.getElementById('sc-habits').textContent=habits.filter(h=>h.logs[today]).length;
+  document.getElementById('sc-custs').textContent=customers.length;
+  const rem=todos.filter(t=>!t.done).length;
+  document.getElementById('rsub').textContent=rem>0?`${rem} 件待辦待完成，今天加油！`:'🎉 今日待辦全部完成！';
+  updateBadge();
+  const fills=['','b','s','g','a'];
+  const hp=document.getElementById('home-progress');
+  const active=goals.filter(g=>!g.done);
+  hp.innerHTML=active.length?active.map((g,i)=>`<div style="margin-bottom:11px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span>${g.name}</span><span style="color:var(--muted)">${g.progress}%</span></div><div class="pbar"><div class="pf ${fills[i%5]}" style="width:${g.progress}%"></div></div></div>`).join(''):'<div class="empty" style="padding:8px 0;"><div class="empty-icon">◎</div>新增目標後顯示</div>';
+  renderReviewCalendar();
+}
+
+// ══ GOALS ══
+let editGoalId=null;let goalFilter='all';
+function filterGoals(cat){
+  goalFilter=cat;
+  document.querySelectorAll('.cat-chip-btn').forEach(b=>b.classList.remove('active'));
+  const map={all:'cf-all','引流':'cf-flow','零售':'cf-retail','其他':'cf-other'};
+  document.getElementById(map[cat]||'cf-all')?.classList.add('active');
+  renderGoals();
+}
+function catClass(cat){if(cat==='引流')return'cat-flow';if(cat==='零售')return'cat-retail';return'cat-other';}
+function catInline(cat){if(cat==='引流')return`<span class="cat-label-inline flow">📣 引流</span>`;if(cat==='零售')return`<span class="cat-label-inline retail">🛍 零售</span>`;return`<span class="cat-label-inline other">${cat}</span>`;}
+
+function renderGoals(){
+  const c=document.getElementById('goals-list');
+  let filtered=goalFilter==='all'?goals:goals.filter(g=>g.category===goalFilter);
+  if(!filtered.length){c.innerHTML=`<div class="empty"><div class="empty-icon">◎</div>還沒有${goalFilter==='all'?'':'「'+goalFilter+'」'}目標<br><button class="btn sm" style="margin-top:10px;" onclick="openGoalModal()">＋ 新增</button></div>`;return;}
+  const fills=['','b','s','g','a'];
+  const renderG=(g,i)=>{
+    const d=daysLeft(g.end);const stD=g.subtasks?g.subtasks.filter(s=>s.done).length:0;const stT=g.subtasks?g.subtasks.length:0;
+    return`<div class="goal-card ${catClass(g.category)}${g.done?' done-card':''}" onclick="showGoalDetail(${g.id})">
+      <div class="goal-top">
+        <div style="flex:1;margin-right:9px;">
+          <div class="goal-name">${g.done?'✅ ':''}${g.name}</div>
+          <div class="goal-meta-row">${catInline(g.category)}${(g.tags||[]).map(t=>`<span class="tag-chip">${t}</span>`).join('')}${stT?`<span style="font-size:9px;color:var(--muted);">子任務 ${stD}/${stT}</span>`:''}</div>
+        </div>
+        <div class="goal-days"><div class="gdn">${d>0?d:0}</div><div class="gdl">${d>0?'天後':'截止'}</div></div>
+      </div>
+      <div class="pbar"><div class="pf ${fills[i%5]}" style="width:${g.progress}%"></div></div>
+      <div class="pbar-meta"><span>${g.desc}</span><span>${g.progress}%</span></div>
+    </div>`;
+  };
+  const active=filtered.filter(g=>!g.done);const done=filtered.filter(g=>g.done);
+  let html=active.map(renderG).join('');
+  if(done.length)html+=`<div style="font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:12px 0 7px;">已完成</div>`+done.map(renderG).join('');
+  c.innerHTML=html;
+}
+
+function showGoalDetail(id){
+  const g=goals.find(x=>x.id===id);if(!g)return;
+  const d=daysLeft(g.end);const idx=goals.indexOf(g);const fills=['','b','s','g','a'];
+  const stHtml=g.subtasks&&g.subtasks.length?`<div class="st-list"><div style="font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;">子任務</div>${g.subtasks.map(st=>`<div class="st-item"><div class="st-chk${st.done?' done':''}" onclick="toggleST(${g.id},${st.id})">${st.done?'✅':''}</div><span class="st-txt${st.done?' done':''}">${st.text}</span></div>`).join('')}</div>`:'';
+  document.getElementById('goal-detail-content').innerHTML=`
+    <div class="pg-label">${g.category}</div><div class="pg-title">${g.name}</div>
+    <div style="margin-bottom:12px;">${catInline(g.category)}${(g.tags||[]).map(t=>`<span class="tag-chip">${t}</span>`).join('')}</div>
+    ${!g.done?`<div class="big-cd"><div class="big-cd-num">${d>0?d:0}</div><div class="big-cd-lbl">天剩餘</div></div>`:'<div style="text-align:center;padding:18px;font-size:30px;">🎉 目標已完成</div>'}
+    <div class="sg2"><div class="sc rose"><div class="slbl">達成率</div><div class="sval">${g.progress}%</div></div><div class="sc navy"><div class="slbl">截止</div><div class="sval" style="font-size:13px;margin-top:4px;">${g.end}</div></div></div>
+    <div class="card"><div class="card-label">更新進度</div><div class="pbar" style="height:7px;margin-bottom:10px;"><div class="pf ${fills[idx%5]}" id="dfill-${g.id}" style="width:${g.progress}%"></div></div><div style="display:flex;gap:9px;align-items:center;"><input type="range" min="0" max="100" value="${g.progress}" style="flex:1;accent-color:var(--rose);" oninput="upProg(${g.id},this.value)"><span id="pval-${g.id}" style="font-size:12px;color:var(--soft-gray);min-width:34px;">${g.progress}%</span></div></div>
+    ${stHtml?`<div class="card">${stHtml}</div>`:''}
+    <div class="card"><div class="card-label">說明</div><p style="font-size:12px;color:var(--soft-gray);margin-top:2px;">${g.desc||'—'}</p></div>
+    <div style="display:flex;gap:7px;margin-top:2px;">
+      ${!g.done?`<button class="btn full green" onclick="completeGoal(${g.id})">🎉 標記完成</button>`:`<button class="btn full ghost" onclick="uncompleteGoal(${g.id})">↩ 重新開啟</button>`}
+      <button class="btn ghost sm" onclick="openGoalModal(${g.id})">編輯</button>
+    </div>`;
+  showPage('goal-detail');
+}
+
+function toggleST(gid,sid){const g=goals.find(x=>x.id===gid);if(!g)return;const st=g.subtasks.find(x=>x.id===sid);if(st){st.done=!st.done;save();showGoalDetail(gid);}}
+function completeGoal(id){const g=goals.find(x=>x.id===id);if(g){g.done=true;g.progress=100;save();showGoalDetail(id);}}
+function uncompleteGoal(id){const g=goals.find(x=>x.id===id);if(g){g.done=false;save();showGoalDetail(id);}}
+function upProg(id,val){const g=goals.find(x=>x.id===id);if(g){g.progress=parseInt(val);save();}const f=document.getElementById('dfill-'+id);if(f)f.style.width=val+'%';document.getElementById('pval-'+id).textContent=val+'%';}
+
+function openGoalModal(id){
+  editGoalId=id||null;
+  document.getElementById('goal-modal-title').textContent=id?'編輯目標':'新增目標';
+  if(id){const g=goals.find(x=>x.id===id);document.getElementById('gf-name').value=g.name;document.getElementById('gf-cat').value=g.category;document.getElementById('gf-tags').value=(g.tags||[]).join(',');document.getElementById('gf-start').value=g.start;document.getElementById('gf-end').value=g.end;document.getElementById('gf-desc').value=g.desc||'';document.getElementById('gf-subs').value=(g.subtasks||[]).map(s=>s.text).join('\n');}
+  else{['gf-name','gf-tags','gf-desc','gf-subs'].forEach(i=>document.getElementById(i).value='');document.getElementById('gf-start').value=TODAY();document.getElementById('gf-end').value='';}
+  document.getElementById('goal-modal').classList.add('open');
+}
+function closeGoalModal(){document.getElementById('goal-modal').classList.remove('open');}
+function saveGoal(){
+  const name=document.getElementById('gf-name').value.trim();const end=document.getElementById('gf-end').value;
+  if(!name||!end){alert('請填寫目標名稱與截止日期');return;}
+  const tags=document.getElementById('gf-tags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const subsRaw=document.getElementById('gf-subs').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(editGoalId){
+    const g=goals.find(x=>x.id===editGoalId);
+    Object.assign(g,{name,category:document.getElementById('gf-cat').value,tags,start:document.getElementById('gf-start').value,end,desc:document.getElementById('gf-desc').value.trim()});
+    const ex=g.subtasks||[];g.subtasks=subsRaw.map((text,i)=>ex[i]?{...ex[i],text}:{id:Date.now()+i,text,done:false});
+    save();closeGoalModal();showGoalDetail(editGoalId);
+  }else{
+    goals.push({id:Date.now(),name,category:document.getElementById('gf-cat').value,tags,start:document.getElementById('gf-start').value,end,desc:document.getElementById('gf-desc').value.trim()||'',progress:0,subtasks:subsRaw.map((text,i)=>({id:Date.now()+i,text,done:false})),done:false});
+    save();closeGoalModal();renderGoals();
+  }
+}
+
+// ══ TODOS ══
+function updateBadge(){const rem=todos.filter(t=>!t.done).length;const b=document.getElementById('tbadge');b.textContent=rem;b.style.display=rem>0?'':'none';}
+function todoHTML(t){return`<div class="todo-item"><div class="todo-chk${t.done?' done':''}" onclick="toggleTodo(${t.id})">${t.done?'✅':''}</div><div class="todo-body"><div class="todo-txt${t.done?' done':''}">${t.text}</div><div class="todo-row2">${priBadge(t.pri)}${t.goal?`<span class="todo-tag">${t.goal}</span>`:''}${dueBadge(t.due,t.done)}${repBadge(t.rep)}</div></div><button class="del-btn" onclick="deleteTodo(${t.id})">✕</button></div>`;}
+function sortT(arr){const o={high:0,mid:1,low:2};return[...arr].sort((a,b)=>(o[a.pri]||1)-(o[b.pri]||1));}
+function renderTodos(){
+  const today=TODAY();
+  const ov=sortT(todos.filter(t=>!t.done&&t.due&&t.due<today));
+  const td=sortT(todos.filter(t=>(!t.due||t.due===today)||t.done));
+  const fu=sortT(todos.filter(t=>!t.done&&t.due&&t.due>today));
+  const os=document.getElementById('todo-overdue-sec');
+  if(ov.length){os.style.display='';document.getElementById('todo-overdue').innerHTML=ov.map(todoHTML).join('');}else os.style.display='none';
+  document.getElementById('todo-today').innerHTML=td.length?td.map(todoHTML).join(''):'<div class="empty" style="padding:14px 0;"><div class="empty-icon">✦</div>今天沒有待辦！</div>';
+  const fs=document.getElementById('todo-future-sec');
+  if(fu.length){fs.style.display='';document.getElementById('todo-future').innerHTML=fu.map(todoHTML).join('');}else fs.style.display='none';
+  updateBadge();
+}
+function toggleTodo(id){
+  const t=todos.find(x=>x.id===id);if(!t)return;t.done=!t.done;save();renderTodos();
+  if(t.done&&t.rep&&t.rep!=='none'){const nd=t.rep==='daily'?ad(TODAY(),1):ad(TODAY(),7);if(!todos.find(x=>x.text===t.text&&x.due===nd&&!x.done)){todos.push({...t,id:Date.now(),done:false,due:nd});save();renderTodos();}}
+}
+function deleteTodo(id){todos=todos.filter(x=>x.id!==id);save();renderTodos();}
+function quickAdd(){const inp=document.getElementById('quick-input');const txt=inp.value.trim();if(!txt)return;todos.push({id:Date.now(),text:txt,done:false,goal:'',due:TODAY(),pri:'mid',rep:'none'});save();inp.value='';renderTodos();}
+let todoPri='mid';let todoRep='none';
+function setPri(p){todoPri=p;['high','mid','low'].forEach(x=>document.getElementById('pri-'+x).classList.toggle('active',x===p));}
+function setRep(r){todoRep=r;['none','daily','weekly'].forEach(x=>document.getElementById('rep-'+x).classList.toggle('active',x===r));}
+function openTodoModal(){document.getElementById('tf-text').value='';document.getElementById('tf-due').value=TODAY();document.getElementById('tf-goal').value='';setPri('mid');setRep('none');document.getElementById('todo-modal').classList.add('open');}
+function closeTodoModal(){document.getElementById('todo-modal').classList.remove('open');}
+function saveTodo(){const txt=document.getElementById('tf-text').value.trim();if(!txt){alert('請輸入事項');return;}todos.push({id:Date.now(),text:txt,done:false,goal:document.getElementById('tf-goal').value.trim(),due:document.getElementById('tf-due').value,pri:todoPri,rep:todoRep});save();closeTodoModal();renderTodos();}
+
+// ══ HABITS ══
+const EMOJIS=['📚','💧','🧘','🏃','✍️','🎯','💪','🥗','😴','📸','💬','📊','🌱','☀️','🎵'];
+function calcStreak(logs){let s=0;let d=new Date();while(true){const k=d.toISOString().split('T')[0];if(!logs[k])break;s++;d.setDate(d.getDate()-1);}return s;}
+function renderHabits(){
+  const c=document.getElementById('habits-list');
+  if(!habits.length){c.innerHTML=`<div class="empty"><div class="empty-icon">🔥</div>還沒有習慣<br><button class="btn sm" style="margin-top:10px;" onclick="openHabitModal()">＋ 新增</button></div>`;return;}
+  const today=TODAY();
+  const last7=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);last7.push(d.toISOString().split('T')[0]);}
+  const dl=['一','二','三','四','五','六','日'];
+  c.innerHTML=habits.map(h=>{
+    const streak=calcStreak(h.logs);const chk=!!h.logs[today];
+    const wk=last7.map(d=>{const lbl=dl[new Date(d).getDay()===0?6:new Date(d).getDay()-1];const cls=d===today?(h.logs[d]?'done':'today'):h.logs[d]?'done':'';return`<div class="hday"><div class="hday-lbl">${lbl}</div><div class="hdot ${cls}"></div></div>`;}).join('');
+    return`<div class="habit-card"><div class="habit-top"><div class="habit-info"><div class="habit-emoji">${h.emoji}</div><div><div class="habit-name">${h.name}</div><div class="habit-streak">${streak>0?`🔥 ${streak} 天連續`:'今天還沒打卡'}</div></div></div><div style="display:flex;align-items:center;gap:7px;"><button class="habit-chk-btn${chk?' checked':''}" onclick="toggleHabit(${h.id})">${chk?'✅':'○'}</button><button onclick="deleteHabit(${h.id})" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;">✕</button></div></div><div class="habit-week">${wk}</div></div>`;
+  }).join('');
+}
+function toggleHabit(id){const h=habits.find(x=>x.id===id);if(!h)return;const t=TODAY();if(h.logs[t])delete h.logs[t];else h.logs[t]=true;save();renderHabits();document.getElementById('sc-habits').textContent=habits.filter(hh=>hh.logs[t]).length;}
+function deleteHabit(id){if(confirm('刪除這個習慣？')){habits=habits.filter(x=>x.id!==id);save();renderHabits();}}
+function openHabitModal(){document.getElementById('hf-name').value='';document.getElementById('hf-emoji').textContent='📚';const p=document.getElementById('emoji-picker');p.innerHTML=EMOJIS.map(e=>`<span onclick="selEmoji('${e}')" style="font-size:22px;cursor:pointer;width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:9px;border:2px solid transparent;" id="ep-${e}">${e}</span>`).join('');selEmoji('📚');document.getElementById('habit-modal').classList.add('open');}
+function selEmoji(e){document.getElementById('hf-emoji').textContent=e;document.querySelectorAll('[id^="ep-"]').forEach(el=>el.style.borderColor='transparent');const el=document.getElementById('ep-'+e);if(el)el.style.borderColor='var(--navy)';}
+function closeHabitModal(){document.getElementById('habit-modal').classList.remove('open');}
+function saveHabit(){const name=document.getElementById('hf-name').value.trim();if(!name){alert('請輸入習慣名稱');return;}habits.push({id:Date.now(),name,emoji:document.getElementById('hf-emoji').textContent||'🎯',logs:{},streak:0});save();closeHabitModal();renderHabits();}
+
+// ══ CRM ══
+let crmFilter='all';let editCustId=null;let addPurchaseCustId=null;
+const STATUS_INFO={lead:{label:'潛在客',icon:'🌱',cls:'sb-lead'},regular:{label:'老客',icon:'⭐',cls:'sb-regular'},return:{label:'待回購',icon:'🔄',cls:'sb-return'},vip:{label:'VIP',icon:'👑',cls:'sb-vip'}};
+const AVATAR_COLORS=['#B05553','#3B567F','#6A9E72','#7B68A4','#C4913A','#A4C2CA'];
+
+function filterCRM(status){
+  crmFilter=status;
+  document.querySelectorAll('.status-chip').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll(`.status-chip.${status}`).forEach(b=>b.classList.add('active'));
+  renderCRM();
+}
+
+function renderCRM(){
+  const search=document.getElementById('crm-search').value.trim().toLowerCase();
+  let list=crmFilter==='all'?customers:customers.filter(c=>c.status===crmFilter);
+  if(search)list=list.filter(c=>c.name.toLowerCase().includes(search)||c.note.toLowerCase().includes(search)||(c.prefs||'').toLowerCase().includes(search));
+  // stats
+  document.getElementById('crm-total').textContent=customers.length;
+  document.getElementById('crm-lead').textContent=customers.filter(c=>c.status==='lead').length;
+  document.getElementById('crm-regular').textContent=customers.filter(c=>c.status==='regular').length;
+  document.getElementById('crm-return').textContent=customers.filter(c=>c.status==='return').length;
+  const c=document.getElementById('crm-list');
+  if(!list.length){c.innerHTML=`<div class="empty"><div class="empty-icon">👥</div>${search?'找不到符合的顧客':'還沒有顧客資料'}</div>`;return;}
+  c.innerHTML=list.map(cu=>{
+    const si=STATUS_INFO[cu.status]||STATUS_INFO.lead;
+    const total=cu.purchases?cu.purchases.reduce((s,p)=>s+Number(p.amount),0):0;
+    return`<div class="cust-card" onclick="showCustDetail(${cu.id})">
+      <div class="cust-top">
+        <div class="cust-avatar" style="background:${cu.color||'#B05553'}">${cu.name[0]}</div>
+        <div style="flex:1;"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="cust-name">${cu.name}</div><span class="status-badge ${si.cls}">${si.icon} ${si.label}</span></div><div class="cust-meta">${cu.contact}</div></div>
+      </div>
+      <div class="cust-bottom">
+        <span class="src-badge">${cu.source}</span>
+        ${total>0?`<span class="purchase-badge">累積 NT$${total.toLocaleString()}</span>`:''}
+        ${cu.prefs?`<span style="font-size:9px;color:var(--muted);">${cu.prefs}</span>`:''}
+      </div>
+      ${cu.note?`<div style="font-size:11px;color:var(--muted);margin-top:7px;padding-top:7px;border-top:1px solid var(--border);">📝 ${cu.note}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function showCustDetail(id){
+  const cu=customers.find(x=>x.id===id);if(!cu)return;
+  const si=STATUS_INFO[cu.status]||STATUS_INFO.lead;
+  const total=cu.purchases?cu.purchases.reduce((s,p)=>s+Number(p.amount),0):0;
+  const pHTML=cu.purchases&&cu.purchases.length?cu.purchases.map(p=>`<div class="purchase-item"><div><div class="pi-name">${p.item}</div><div class="pi-meta">${p.date}${p.note?' · '+p.note:''}</div></div><div class="pi-amount">NT$${Number(p.amount).toLocaleString()}</div></div>`).join(''):'<div style="font-size:12px;color:var(--muted);padding:10px 0;">尚無購買紀錄</div>';
+  document.getElementById('cust-detail-content').innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <div class="cust-avatar" style="background:${cu.color||'#B05553'};width:52px;height:52px;font-size:20px;border-radius:16px;">${cu.name[0]}</div>
+      <div><div style="font-size:18px;font-weight:500;">${cu.name}</div><div style="margin-top:4px;display:flex;gap:5px;align-items:center;"><span class="status-badge ${si.cls}">${si.icon} ${si.label}</span><span class="src-badge">${cu.source}</span></div></div>
+    </div>
+    <div class="sg2 " style="margin-bottom:12px;">
+      <div class="sc navy"><div class="slbl">累積消費</div><div class="sval" style="font-size:18px;margin-top:2px;">NT$${total.toLocaleString()}</div></div>
+      <div class="sc"><div class="slbl">購買次數</div><div class="sval">${(cu.purchases||[]).length}</div><div class="ssub">次</div></div>
+    </div>
+    <div class="card">
+      <div class="card-label">基本資料</div>
+      <div class="detail-row"><div class="detail-key">聯絡方式</div><div class="detail-val">${cu.contact||'—'}</div></div>
+      <div class="detail-row"><div class="detail-key">喜好標籤</div><div class="detail-val">${cu.prefs||'—'}</div></div>
+      <div class="detail-row"><div class="detail-key">備註</div><div class="detail-val">${cu.note||'—'}</div></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div class="card-label" style="margin-bottom:0;">購買紀錄</div>
+        <button class="btn sm" onclick="openPurchaseModal(${cu.id})">＋ 新增</button>
+      </div>
+      ${pHTML}
+    </div>
+    <div style="display:flex;gap:7px;margin-top:2px;">
+      <button class="btn full" onclick="openCustModal(${cu.id})">✏️ 編輯資料</button>
+      <button class="btn ghost sm" onclick="deleteCust(${cu.id})">刪除</button>
+    </div>`;
+  showPage('cust-detail');
+}
+
+function openCustModal(id){
+  editCustId=id||null;
+  document.getElementById('cust-modal-title').textContent=id?'編輯顧客':'新增顧客';
+  if(id){const cu=customers.find(x=>x.id===id);document.getElementById('cf-name').value=cu.name;document.getElementById('cf-contact').value=cu.contact||'';document.getElementById('cf-source').value=cu.source||'IG';document.getElementById('cf-status').value=cu.status||'lead';document.getElementById('cf-last-purchase').value=cu.lastPurchase||'';document.getElementById('cf-prefs').value=cu.prefs||'';document.getElementById('cf-note').value=cu.note||'';}
+  else{['cf-name','cf-contact','cf-last-purchase','cf-prefs','cf-note'].forEach(i=>document.getElementById(i).value='');document.getElementById('cf-source').value='IG';document.getElementById('cf-status').value='lead';}
+  document.getElementById('cust-modal').classList.add('open');
+}
+function closeCustModal(){document.getElementById('cust-modal').classList.remove('open');}
+function saveCust(){
+  const name=document.getElementById('cf-name').value.trim();if(!name){alert('請填寫顧客姓名');return;}
+  const data={name,contact:document.getElementById('cf-contact').value.trim(),source:document.getElementById('cf-source').value,status:document.getElementById('cf-status').value,lastPurchase:document.getElementById('cf-last-purchase').value.trim(),prefs:document.getElementById('cf-prefs').value.trim(),note:document.getElementById('cf-note').value.trim()};
+  if(editCustId){Object.assign(customers.find(x=>x.id===editCustId),data);save();closeCustModal();showCustDetail(editCustId);}
+  else{const colors=['#B05553','#3B567F','#6A9E72','#7B68A4','#C4913A'];customers.push({id:Date.now(),...data,purchases:[],color:colors[customers.length%colors.length]});save();closeCustModal();renderCRM();}
+}
+function deleteCust(id){if(confirm('確定刪除此顧客資料？')){customers=customers.filter(x=>x.id!==id);save();showPage('crm');}}
+
+function openPurchaseModal(custId){
+  addPurchaseCustId=custId;
+  document.getElementById('pf-item').value='';document.getElementById('pf-amount').value='';document.getElementById('pf-note').value='';document.getElementById('pf-date').value=TODAY();
+  document.getElementById('purchase-modal').classList.add('open');
+}
+function savePurchase(){
+  const item=document.getElementById('pf-item').value.trim();const amount=document.getElementById('pf-amount').value;
+  if(!item){alert('請填寫商品名稱');return;}
+  const cu=customers.find(x=>x.id===addPurchaseCustId);if(!cu)return;
+  if(!cu.purchases)cu.purchases=[];
+  cu.purchases.push({id:Date.now(),item,amount:Number(amount)||0,date:document.getElementById('pf-date').value,note:document.getElementById('pf-note').value.trim()});
+  cu.lastPurchase=`${item}，NT$${amount}`;
+  // auto update status to regular if was lead
+  if(cu.status==='lead')cu.status='regular';
+  save();document.getElementById('purchase-modal').classList.remove('open');showCustDetail(addPurchaseCustId);
+}
+
+// ══ REVIEW CALENDAR ══
+function renderReviewCalendar(){
+  const el=document.getElementById('home-streak');
+  if(!el)return;
+  const now=new Date();
+  const year=now.getFullYear();
+  const month=now.getMonth();
+  const todayStr=TODAY();
+  const prefix=`${year}-${String(month+1).padStart(2,'0')}`;
+
+  // date -> [types]
+  const rmap={};
+  reviews.forEach(r=>{
+    if(!rmap[r.date])rmap[r.date]=[];
+    if(!rmap[r.date].includes(r.type))rmap[r.date].push(r.type);
+  });
+
+  const firstDay=new Date(year,month,1).getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const mRevs=reviews.filter(r=>r.date.startsWith(prefix));
+  const mDays=new Set(mRevs.map(r=>r.date)).size;
+
+  const DOW=['日','一','二','三','四','五','六'];
+  const TLABEL={daily:'🌙日覆盤',weekly:'📅週覆盤',monthly:'🗓月覆盤',quarterly:'📊季覆盤',yearly:'🌸年覆盤'};
+  const TCOLOR={daily:'var(--sky)',weekly:'var(--navy)',monthly:'var(--rose)',quarterly:'var(--amber)',yearly:'var(--green)'};
+
+  // ── stats bar ──
+  let html=`
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div style="font-family:'DM Serif Display',serif;font-size:16px;color:var(--charcoal);">${year}年 ${month+1}月</div>
+    <div style="font-size:11px;color:var(--soft-gray);text-align:right;line-height:1.6;">
+      <span style="color:var(--rose);font-weight:500;">${mDays}</span> 天有覆盤<br>
+      共 <span style="color:var(--navy);font-weight:500;">${mRevs.length}</span> 筆紀錄
+    </div>
+  </div>`;
+
+  // ── weekday header ──
+  html+=`<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:5px;">
+    ${DOW.map(d=>`<div style="font-size:9px;color:var(--muted);text-align:center;font-weight:500;">${d}</div>`).join('')}
+  </div>`;
+
+  // ── grid ──
+  html+=`<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">`;
+
+  for(let i=0;i<firstDay;i++) html+=`<div></div>`;
+
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${prefix}-${String(d).padStart(2,'0')}`;
+    const isToday=ds===todayStr;
+    const isFuture=ds>todayStr;
+    const types=rmap[ds]||[];
+    const has=types.length>0;
+
+    // background
+    let bg,txtColor='#fff',border='none';
+    if(isFuture){
+      bg='transparent'; txtColor='rgba(168,164,160,.4)';
+    } else if(!has){
+      bg='var(--blush-pale)'; txtColor='var(--muted)';
+    } else if(types.length>1){
+      bg=`linear-gradient(135deg,${TCOLOR[types[0]]||'var(--rose)'},${TCOLOR[types[1]]||'var(--navy)'})`; 
+    } else {
+      bg=TCOLOR[types[0]]||'var(--sky)';
+    }
+    if(isToday) border=`2px solid var(--rose)`;
+
+    const tipTxt=has?types.map(t=>TLABEL[t]||t).join(' + '):isToday?'今天，尚未覆盤':'';
+
+    html+=`<div
+      onclick="${has&&!isFuture?`goToReviewDay('${ds}')`:''}"
+      style="
+        position:relative;aspect-ratio:1;border-radius:8px;
+        background:${bg};color:${txtColor};border:${border};
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        gap:1px;cursor:${has&&!isFuture?'pointer':'default'};
+        font-size:${isToday?'11':'10'}px;font-weight:${isToday?'600':'400'};
+        ${has?'box-shadow:0 1px 5px rgba(0,0,0,.1);':''}
+        transition:transform .12s;
+      "
+      ontouchstart="${has&&!isFuture?"this.style.transform='scale(.88)'":''}"
+      ontouchend="${has&&!isFuture?"this.style.transform=''":""}">
+      ${has?'<span style="font-size:8px;line-height:1;">✅</span>':''}
+      <span>${d}</span>
+      ${tipTxt?`<div style="
+        position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+        background:var(--charcoal);color:#fff;font-size:9px;padding:4px 8px;
+        border-radius:7px;white-space:nowrap;z-index:99;
+        pointer-events:none;opacity:0;transition:opacity .15s;
+      " class="cal-tip">${tipTxt}</div>`:''}
+    </div>`;
+  }
+  html+=`</div>`;
+
+  // ── legend ──
+  html+=`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">
+    ${Object.entries(TCOLOR).map(([t,c])=>`<div style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--muted);">
+      <div style="width:10px;height:10px;border-radius:3px;background:${c};flex-shrink:0;"></div>${TLABEL[t].slice(2)}
+    </div>`).join('')}
+    <div style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--muted);">
+      <div style="width:10px;height:10px;border-radius:3px;background:var(--blush-pale);border:1.5px solid var(--rose);flex-shrink:0;"></div>今天
+    </div>
+  </div>`;
+
+  // tip hover via CSS trick (mobile: show on touch via JS above)
+  el.innerHTML=html;
+  // desktop hover show tips
+  el.querySelectorAll('.cal-tip').forEach(tip=>{
+    const cell=tip.parentElement;
+    cell.addEventListener('mouseenter',()=>tip.style.opacity='1');
+    cell.addEventListener('mouseleave',()=>tip.style.opacity='0');
+  });
+}
+
+function goToReviewDay(dateStr){
+  // Show review menu and highlight that day's reviews
+  showPage('review-menu');
+  // scroll to history section after a tick
+  setTimeout(()=>{
+    const items=document.querySelectorAll('#review-history-list .rh-item');
+    items.forEach(item=>{
+      if(item.querySelector('.rh-date')&&item.querySelector('.rh-date').textContent.startsWith(dateStr)){
+        item.scrollIntoView({behavior:'smooth',block:'center'});
+        item.style.background='var(--sky-pale)';
+        setTimeout(()=>item.style.background='',1200);
+      }
+    });
+  },200);
+}
+
+// ══ REVIEW ══
+const REVIEW_TYPES={
+  daily:{
+    label:'日覆盤',icon:'🌙',sub:'每天花 10 分鐘回顧',
+    hint:'可全部回答，或選 3–5 個最有感的問題',
+    questions:[
+      '今天完成了哪些任務？',
+      '今天的狀態如何？（精力 / 情緒 / 專注度）',
+      '今天有哪些美好的小確幸？',
+      '今天有什麼新感悟？學到哪些新知識？',
+      '今天遇到了什麼問題？該如何解決 / 調整？',
+      '今天時間分配上有什麼需要改進的？',
+      '明天有哪些目標和任務？'
+    ]
+  },
+  weekly:{
+    label:'週覆盤',icon:'📅',sub:'每週結束花 30 分鐘覆盤',
+    hint:'請每週結束時花 30 分鐘覆盤一下吧',
+    questions:[
+      '本週計劃完成度怎麼樣？原因是什麼？',
+      '本週健康情況如何？（睡眠 / 飲食 / 運動）',
+      '本週消費情況如何？',
+      '本週完成的最有意義的事是什麼？',
+      '本週最開心 / 最難過的事是什麼？',
+      '本週有哪些值得感恩的事？',
+      '本週有哪些反思？下週如何調整？',
+      '下週有哪些目標和任務？'
+    ]
+  },
+  monthly:{
+    label:'月覆盤',icon:'🗓',sub:'月底花 1 小時回顧這個月',
+    hint:'月底花 1 小時的時間回顧這個月',
+    questions:[
+      '這個月的關鍵詞是？',
+      '這個月最有成就感的瞬間是？',
+      '月初的目標完成了 / 沒完成的有哪些？',
+      '有哪些做得好 / 不好的地方？如何改進？',
+      '這個月學會 / 收獲了什麼？',
+      '這個月在工作 / 財務 / 家庭 / 健康 / 社交方面有什麼情況、變化、進展？如何評價自己？',
+      '這個月養成了什麼習慣？下個月想堅持什麼？',
+      '下個月想完成什麼目標和任務？'
+    ]
+  },
+  quarterly:{
+    label:'季覆盤',icon:'📊',sub:'季度回顧',
+    hint:'三個月一次的深度回顧',
+    questions:[
+      '這季的核心成果是什麼？',
+      '與預期有什麼不同？原因是什麼？',
+      '下季核心目標（1–3 個）',
+      '在工作 / 財務 / 健康 / 關係各方面的進展如何？',
+      '給這一季打分數並說明原因'
+    ]
+  },
+  yearly:{
+    label:'年覆盤',icon:'🌸',sub:'年度故事',
+    hint:'一年一度的深度回顧與展望',
+    questions:[
+      '今年最珍貴的時刻是？',
+      '今年最大的成長是？',
+      '今年學到的人生課題',
+      '給一年後的自己寫一封信',
+      '明年的一個字主題是？'
+    ]
+  }
+};
+
+function renderReviewMenu(){
+  document.getElementById('review-menu-cards').innerHTML=Object.entries(REVIEW_TYPES).map(([k,rt],i)=>`<button style="width:100%;display:flex;align-items:center;gap:11px;padding:14px 15px;background:transparent;border:none;font-family:'Noto Sans TC',sans-serif;cursor:pointer;${i>0?'border-top:1px solid var(--border);':''}" onclick="openReview('${k}')"><span style="font-size:19px;">${rt.icon}</span><div style="text-align:left;flex:1;"><div style="font-size:13px;color:var(--charcoal);font-weight:500;">${rt.label}</div><div style="font-size:10px;color:var(--muted);margin-top:1px;">${rt.hint}</div></div><span style="color:var(--muted);font-size:15px;">›</span></button>`).join('');
+  const hl=document.getElementById('review-history-list');
+  if(!reviews.length){hl.innerHTML='<div class="empty" style="padding:16px 0;"><div class="empty-icon">📖</div>還沒有覆盤紀錄</div>';return;}
+  hl.innerHTML=[...reviews].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,15).map(r=>`<div class="rh-item" onclick="showReviewDetail(${r.id})"><div class="rh-date">${r.date} · ${REVIEW_TYPES[r.type]?.label||r.type}</div><div class="rh-title">${r.title}</div><div class="rh-preview">${Object.values(r.answers||{}).filter(Boolean).join(' · ')}</div></div>`).join('');
+}
+
+let reviewType='daily';
+function openReview(type){
+  reviewType=type;const rt=REVIEW_TYPES[type];
+  document.getElementById('rw-label').textContent=rt.label;
+  document.getElementById('rw-title').textContent=rt.label;
+  document.getElementById('rw-sub').textContent=rt.hint;
+  document.getElementById('rw-form').innerHTML=
+    rt.questions.map((q,i)=>`<div class="review-q"><label>✦ ${q}</label><textarea class="review-ta" id="rq-${i}" placeholder="寫下你的想法…"></textarea></div>`).join('')+
+    `<button class="btn full" style="margin-top:5px;" onclick="saveReview('${type}')">儲存並獲得 AI 建議 ✧</button>`;
+  showPage('review-write');
+}
+
+async function saveReview(type){
+  const rt=REVIEW_TYPES[type];
+  const answers={};
+  rt.questions.forEach((q,i)=>{answers[q]=document.getElementById('rq-'+i).value.trim();});
+  const hasContent=Object.values(answers).some(v=>v);
+  if(!hasContent){alert('請至少填寫一個問題');return;}
+  const rid=Date.now();
+  reviews.push({id:rid,type,date:TODAY(),title:`${rt.label} — ${TODAY()}`,answers,aiSuggestion:''});
+  save();
+
+  // Go to detail and show AI loading
+  showReviewDetail(rid, true);
+  showPage('review-detail');
+
+  // Call AI for suggestions
+  const answersText=Object.entries(answers).filter(([,v])=>v).map(([q,a])=>`【${q}】\n${a}`).join('\n\n');
+  const ctx=getCtx();
+  const prompt=`以下是用戶的${rt.label}內容：\n\n${answersText}\n\n用戶的目標與習慣背景：\n${ctx}`;
+  const system=`你是一位專業的個人成長教練，用繁體中文回覆。請根據用戶的覆盤內容：
+1. 給出 2-3 個具體的正向肯定（讓用戶感受到被理解）
+2. 指出 1-2 個值得關注的改進點，並給出可立即執行的解決方案
+3. 根據用戶的目標，給出下一步最重要的行動建議
+回覆請控制在 200 字內，用條列或分段，語氣溫暖有力。`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:700,system,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    const reply=data.content?.map(c=>c.text||'').join('')||'';
+    const r=reviews.find(x=>x.id===rid);
+    if(r){r.aiSuggestion=reply;save();renderReviewCalendar();}
+    showReviewDetail(rid, false);
+  }catch(e){
+    const r=reviews.find(x=>x.id===rid);
+    if(r){r.aiSuggestion='連線發生問題，無法取得 AI 建議。';save();renderReviewCalendar();}
+    showReviewDetail(rid, false);
+  }
+}
+
+function showReviewDetail(id, loading=false){
+  const r=reviews.find(x=>x.id===id);if(!r)return;const rt=REVIEW_TYPES[r.type];
+  const aiBlock = loading
+    ? `<div class="card" style="background:var(--navy-pale);border-color:var(--navy);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span style="font-size:16px;">✧</span>
+          <div style="font-size:12px;font-weight:500;color:var(--navy);">AI 正在分析你的覆盤…</div>
+        </div>
+        <div class="ld" style="padding:4px 0;"><span></span><span></span><span></span></div>
+      </div>`
+    : r.aiSuggestion
+      ? `<div class="card" style="background:var(--navy-pale);border-color:var(--navy);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <span style="font-size:16px;">✧</span>
+            <div style="font-size:12px;font-weight:500;color:var(--navy);">AI 覆盤建議</div>
+          </div>
+          <p style="font-size:12px;color:var(--charcoal);line-height:1.7;white-space:pre-wrap;">${r.aiSuggestion}</p>
+        </div>`
+      : '';
+
+  document.getElementById('review-detail-content').innerHTML=`
+    <div class="pg-label">${rt?.label||r.type}</div>
+    <div class="pg-title">${r.title}</div>
+    <div class="pg-sub">${r.date}</div>
+    ${aiBlock}
+    <div class="card">
+      ${Object.entries(r.answers||{}).map(([q,a])=>`
+        <div class="review-q">
+          <label>✦ ${q}</label>
+          <p style="font-size:12px;color:var(--soft-gray);line-height:1.6;">${a||'（未填寫）'}</p>
+        </div>`).join('')}
+    </div>
+    <button class="btn ghost full" onclick="deleteReview(${r.id})">刪除此紀錄</button>`;
+  if(!document.getElementById('page-review-detail').classList.contains('active')) showPage('review-detail');
+}
+
+function deleteReview(id){if(confirm('確定刪除？')){reviews=reviews.filter(x=>x.id!==id);save();showPage('review-menu');}}
+
+// ══ AI ══
+let aiHistory=[];let aiMode='analyze';
+const AI_MODES={
+  analyze:{label:'目標分析',quick:['分析我的目標進度','哪個目標需要注意？','給我引流建議','零售目標怎麼達成？'],system:ctx=>`你是專業目標管理教練，請用繁體中文，針對用戶的銷售和引流目標給出具體建議。用戶資料：\n${ctx}\n回覆控制在 150 字內，條列式呈現。`},
+  review:{label:'覆盤助理',quick:['引導我做週覆盤','幫我反思這週的銷售','引流效果分析','顧客轉換率如何提升？'],system:ctx=>`你是覆盤引導師，幫助銷售者做業務覆盤。用繁體中文引導。用戶資料：\n${ctx}\n提出 2-3 個深度問題，回覆 120 字內。`},
+  todo:{label:'生成待辦',quick:['幫我生成今天的銷售待辦','引流任務拆解','顧客跟進計劃','本週零售行動清單'],system:ctx=>`你是銷售任務拆解專家，用繁體中文幫用戶拆解銷售目標為具體待辦。用戶資料：\n${ctx}\n條列式，每項 10-20 字，150 字內。`},
+  crm:{label:'顧客策略',quick:['如何跟進潛在客？','老客回購策略','VIP 顧客維護方法','如何提升客單價？'],system:ctx=>`你是電商銷售顧問，專精於 IG/小紅書/網路商店的顧客經營策略。用繁體中文，給出具體可行的顧客管理建議。用戶資料：\n${ctx}\n150 字內，條列式。`},
+};
+function getCtx(){
+  const gc=goals.filter(g=>!g.done).map(g=>`目標「${g.name}」(${g.category})：${g.progress}%，${daysLeft(g.end)}天後截止`).join('\n')||'無目標';
+  const cc=`顧客總數：${customers.length}，潛在客：${customers.filter(c=>c.status==='lead').length}，老客：${customers.filter(c=>c.status==='regular').length}，待回購：${customers.filter(c=>c.status==='return').length}，VIP：${customers.filter(c=>c.status==='vip').length}`;
+  const hc=habits.map(h=>`習慣「${h.name}」連續 ${calcStreak(h.logs)} 天`).join('\n')||'無習慣';
+  return`目標：\n${gc}\n顧客狀況：\n${cc}\n習慣：\n${hc}`;
+}
+function setAIMode(mode){aiMode=mode;document.querySelectorAll('.ai-mode-btn').forEach(b=>b.classList.remove('active'));document.getElementById('mode-'+mode).classList.add('active');updateAIQuick();clearAI();setTimeout(()=>askAI({analyze:'請幫我分析目前的目標和顧客狀況。',review:'請引導我做本週的銷售覆盤。',todo:'根據我的目標，幫我生成今天的銷售待辦。',crm:'根據我的顧客資料，給我跟進建議。'}[mode]),200);}
+function updateAIQuick(){document.getElementById('ai-quick-btns').innerHTML=AI_MODES[aiMode].quick.map(q=>`<button class="ai-quick" onclick="askAI('${q}')">${q}</button>`).join('');}
+function clearAI(){aiHistory=[];document.getElementById('ai-msgs').innerHTML='';}
+function initAI(){updateAIQuick();if(!aiHistory.length)addMsg('ai','你好！我是你的 AI 目標助理 ✦\n\n我知道你有引流和零售目標，以及顧客資料。選擇上方模式開始，我可以幫你分析進度、引導覆盤、生成銷售待辦或給顧客跟進建議！');}
+function addMsg(role,text){const box=document.getElementById('ai-msgs');const d=document.createElement('div');d.className=`ai-msg ${role}`;d.textContent=text;box.appendChild(d);box.scrollTop=box.scrollHeight;return d;}
+function addLoading(){const box=document.getElementById('ai-msgs');const d=document.createElement('div');d.className='ai-msg ai ld';d.innerHTML='<span></span><span></span><span></span>';box.appendChild(d);box.scrollTop=box.scrollHeight;return d;}
+async function askAI(text){
+  if(!text||!text.trim())return;
+  addMsg('user',text);aiHistory.push({role:'user',content:text});
+  const loading=addLoading();
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,system:AI_MODES[aiMode].system(getCtx()),messages:aiHistory})});
+    const data=await res.json();
+    const reply=data.content?.map(c=>c.text||'').join('')||'抱歉，請稍後再試。';
+    loading.remove();addMsg('ai',reply);aiHistory.push({role:'assistant',content:reply});
+  }catch(e){loading.remove();addMsg('ai','連線發生問題，請確認網路後再試。');}
+}
+async function sendAI(){const inp=document.getElementById('ai-input');const text=inp.value.trim();if(!text)return;inp.value='';await askAI(text);}
+
+// ══ MODAL CLOSE ══
+document.querySelectorAll('.overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});});
+
+// ══ INIT ══
+initDate();renderHome();renderTodos();showPage('home');
+</script>
+</body>
+</html>
+<script>
+// ══ SWIPE TO DELETE ══
+function makeSwipeable(el, onDelete, label){
+  if(!el || el.closest('.swipe-wrap')) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'swipe-wrap';
+  el.parentNode.insertBefore(wrap, el);
+  const bg = document.createElement('div');
+  bg.className = 'swipe-delete-bg';
+  bg.innerHTML = `<span class="sd-icon">🗑</span><span>${label||'刪除'}</span>`;
+  wrap.appendChild(bg);
+  const inner = document.createElement('div');
+  inner.className = 'swipe-inner';
+  wrap.appendChild(inner);
+  inner.appendChild(el);
+  let startX=0,startY=0,curX=0,dragging=false,locked=false,dirLocked=false,isHoriz=false;
+  const THRESHOLD=80, SHOW_AT=30;
+  function onStart(e){
+    if(locked)return;
+    const t=e.touches?e.touches[0]:e;
+    startX=t.clientX;startY=t.clientY;curX=0;
+    dragging=true;dirLocked=false;isHoriz=false;
+    inner.classList.remove('snap-back','snap-delete');
+    inner.classList.add('swiping');
+  }
+  function onMove(e){
+    if(!dragging||locked)return;
+    const t=e.touches?e.touches[0]:e;
+    const dx=t.clientX-startX,dy=t.clientY-startY;
+    if(!dirLocked){if(Math.abs(dx)<4&&Math.abs(dy)<4)return;isHoriz=Math.abs(dx)>Math.abs(dy);dirLocked=true;}
+    if(!isHoriz)return;
+    e.preventDefault();
+    curX=Math.max(0,dx);
+    inner.style.transform=`translateX(${curX}px)`;
+    wrap.classList.toggle('revealing',curX>SHOW_AT);
+  }
+  function onEnd(){
+    if(!dragging||locked)return;
+    dragging=false;dirLocked=false;
+    inner.classList.remove('swiping');
+    if(curX>=THRESHOLD){
+      locked=true;
+      inner.classList.add('snap-delete');
+      inner.style.transform='';
+      setTimeout(()=>{try{onDelete();}catch(e){}wrap.remove();},280);
+    }else{
+      inner.classList.add('snap-back');
+      inner.style.transform='';
+      wrap.classList.remove('revealing');
+      setTimeout(()=>inner.classList.remove('snap-back'),320);
+    }
+    curX=0;
+  }
+  inner.addEventListener('touchstart',onStart,{passive:true});
+  inner.addEventListener('touchmove',onMove,{passive:false});
+  inner.addEventListener('touchend',onEnd,{passive:true});
+  inner.addEventListener('mousedown',onStart);
+  document.addEventListener('mousemove',e=>{if(dragging)onMove(e);},{passive:false});
+  document.addEventListener('mouseup',e=>{if(dragging)onEnd(e);});
+}
+
+function applySwipe(){
+  // Goals
+  document.querySelectorAll('#goals-list .goal-card').forEach(card=>{
+    if(card.closest('.swipe-wrap'))return;
+    const m=(card.getAttribute('onclick')||'').match(/\d+/);
+    if(!m)return;
+    const id=parseInt(m[0]);
+    makeSwipeable(card,()=>{goals=goals.filter(g=>g.id!==id);save();renderGoals();renderHome();},'刪除目標');
+  });
+  // Todos
+  ['todo-today','todo-overdue','todo-future'].forEach(sid=>{
+    document.querySelectorAll(`#${sid} .todo-item`).forEach(item=>{
+      if(item.closest('.swipe-wrap'))return;
+      const btn=item.querySelector('.del-btn');if(!btn)return;
+      const m=(btn.getAttribute('onclick')||'').match(/\d+/);if(!m)return;
+      const id=parseInt(m[0]);
+      makeSwipeable(item,()=>{todos=todos.filter(t=>t.id!==id);save();renderTodos();},'刪除待辦');
+    });
+  });
+  // Habits
+  document.querySelectorAll('#habits-list .habit-card').forEach(card=>{
+    if(card.closest('.swipe-wrap'))return;
+    const btn=card.querySelector('button[onclick^="deleteHabit"]');if(!btn)return;
+    const m=(btn.getAttribute('onclick')||'').match(/\d+/);if(!m)return;
+    const id=parseInt(m[0]);
+    makeSwipeable(card,()=>{habits=habits.filter(h=>h.id!==id);save();renderHabits();},'刪除習慣');
+  });
+  // Customers
+  document.querySelectorAll('#crm-list .cust-card').forEach(card=>{
+    if(card.closest('.swipe-wrap'))return;
+    const m=(card.getAttribute('onclick')||'').match(/\d+/);if(!m)return;
+    const id=parseInt(m[0]);
+    makeSwipeable(card,()=>{customers=customers.filter(c=>c.id!==id);save();renderCRM();renderHome();},'刪除顧客');
+  });
+}
+
+// Observe DOM changes to auto-apply swipe after renders
+const _obs=new MutationObserver(()=>applySwipe());
+['goals-list','todo-today','todo-overdue','todo-future','habits-list','crm-list'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el)_obs.observe(el,{childList:true,subtree:true});
+});
+applySwipe();
+</script>
